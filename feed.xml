@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:media="http://search.yahoo.com/mrss/">
+  <channel>
+    <title>Swim Rankings Leaderboard - SCY</title>
+    <link>https://scottschatz.github.io/swim-leaderboard</link>
+    <description>Girls Open (13+) National Rankings - Short Course Yards Season</description>
+    <language>en-us</language>
+    <lastBuildDate>Sat, 27 Dec 2025 12:16:04 +0000</lastBuildDate>
+    <ttl>1440</ttl>
+    <item>
+      <title>100 Back Scy</title>
+      <link>https://scottschatz.github.io/swim-leaderboard/images/100_back_scy.png</link>
+      <description>Girls Open (13+) National Rankings - 100 Back Scy</description>
+      <pubDate>Sat, 27 Dec 2025 12:16:04 +0000</pubDate>
+      <enclosure url="https://scottschatz.github.io/swim-leaderboard/images/100_back_scy.png" type="image/png" />
+      <media:content url="https://scottschatz.github.io/swim-leaderboard/images/100_back_scy.png" type="image/png" medium="image" />
+    </item>
+    <item>
+      <title>100 Breast Scy</title>
+      <link>https://scottschatz.github.io/swim-leaderboard/images/100_breast_scy.png</link>
+      <description>Girls Open (13+) National Rankings - 100 Breast Scy</description>
+      <pubDate>Sat, 27 Dec 2025 12:16:04 +0000</pubDate>
+      <enclosure url="https://scottschatz.github.io/swim-leaderboard/images/100_breast_scy.png" type="image/png" />
+      <media:content url="https://scottschatz.github.io/swim-leaderboard/images/100_breast_scy.png" type="image/png" medium="image" />
+    </item>
+    <item>
+      <title>200 Back Scy</title>
+      <link>https://scottschatz.github.io/swim-leaderboard/images/200_back_scy.png</link>
+      <description>Girls Open (13+) National Rankings - 200 Back Scy</description>
+      <pubDate>Sat, 27 Dec 2025 12:16:04 +0000</pubDate>
+      <enclosure url="https://scottschatz.github.io/swim-leaderboard/images/200_back_scy.png" type="image/png" />
+      <media:content url="https://scottschatz.github.io/swim-leaderboard/images/200_back_scy.png" type="image/png" medium="image" />
+    </item>
+    <item>
+      <title>200 Breast Scy</title>
+      <link>https://scottschatz.github.io/swim-leaderboard/images/200_breast_scy.png</link>
+      <description>Girls Open (13+) National Rankings - 200 Breast Scy</description>
+      <pubDate>Sat, 27 Dec 2025 12:16:04 +0000</pubDate>
+      <enclosure url="https://scottschatz.github.io/swim-leaderboard/images/200_breast_scy.png" type="image/png" />
+      <media:content url="https://scottschatz.github.io/swim-leaderboard/images/200_breast_scy.png" type="image/png" medium="image" />
+    </item>
+    <item>
+      <title>200 Im Scy</title>
+      <link>https://scottschatz.github.io/swim-leaderboard/images/200_im_scy.png</link>
+      <description>Girls Open (13+) National Rankings - 200 Im Scy</description>
+      <pubDate>Sat, 27 Dec 2025 12:16:04 +0000</pubDate>
+      <enclosure url="https://scottschatz.github.io/swim-leaderboard/images/200_im_scy.png" type="image/png" />
+      <media:content url="https://scottschatz.github.io/swim-leaderboard/images/200_im_scy.png" type="image/png" medium="image" />
+    </item>
+    <item>
+      <title>400 Im Scy</title>
+      <link>https://scottschatz.github.io/swim-leaderboard/images/400_im_scy.png</link>
+      <description>Girls Open (13+) National Rankings - 400 Im Scy</description>
+      <pubDate>Sat, 27 Dec 2025 12:16:04 +0000</pubDate>
+      <enclosure url="https://scottschatz.github.io/swim-leaderboard/images/400_im_scy.png" type="image/png" />
+      <media:content url="https://scottschatz.github.io/swim-leaderboard/images/400_im_scy.png" type="image/png" medium="image" />
+    </item>
+  </channel>
+</rss>
