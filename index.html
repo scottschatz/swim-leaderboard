@@ -1,8 +1,10 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <title>Swim Rankings Leaderboard</title>
     <style>
         * {
@@ -15,6 +17,8 @@
             height: 100%;
             overflow: hidden;
             background: #494f5d;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            touch-action: pan-x pan-y;
         }
         .slideshow {
             width: 100%;
@@ -22,51 +26,295 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            position: relative;
         }
-        .slideshow img {
+        .slide-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+        }
+        .slide-container img {
             max-width: 100%;
             max-height: 100%;
+            width: auto;
+            height: auto;
             object-fit: contain;
             opacity: 0;
-            transition: opacity 1s ease-in-out;
+            transition: opacity 0.8s ease-in-out;
+            border-radius: 8px;
         }
-        .slideshow img.active {
+        .slide-container img.active {
             opacity: 1;
+        }
+
+        /* Dots indicator */
+        .dots {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 10;
+        }
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transition: background 0.3s, transform 0.3s;
+        }
+        .dot.active {
+            background: rgba(255, 255, 255, 0.9);
+            transform: scale(1.2);
+        }
+
+        /* Updated timestamp */
+        .updated {
+            position: fixed;
+            bottom: 8px;
+            right: 12px;
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.4);
+            z-index: 10;
+        }
+
+        /* Pause indicator */
+        .paused-indicator {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 48px;
+            color: rgba(255, 255, 255, 0.6);
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            z-index: 20;
+        }
+        .paused-indicator.visible {
+            opacity: 1;
+        }
+
+        /* Loading state */
+        .loading {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 14px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            .slide-container {
+                padding: 5px;
+            }
+            .dots {
+                bottom: 15px;
+            }
+            .dot {
+                width: 8px;
+                height: 8px;
+            }
+            .updated {
+                font-size: 10px;
+                bottom: 5px;
+                right: 8px;
+            }
+        }
+
+        /* Portrait mode (Dakboard) */
+        @media (orientation: portrait) and (min-height: 1000px) {
+            .slide-container {
+                padding: 20px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="slideshow">
-        <img id="slide" src="" alt="Swim Rankings">
+    <div class="slideshow" id="slideshow">
+        <div class="slide-container">
+            <img id="slide" src="" alt="Swim Rankings Leaderboard">
+        </div>
+        <div class="dots" id="dots"></div>
+        <div class="updated" id="updated">Loading...</div>
+        <div class="paused-indicator" id="pausedIndicator">⏸</div>
     </div>
+
     <script>
-        const images = ["images/100_back_scy.png", "images/100_breast_scy.png", "images/200_back_scy.png", "images/200_breast_scy.png", "images/200_im_scy.png", "images/400_im_scy.png"];
+        let images = [];
         let currentIndex = 0;
+        let intervalId = null;
+        let isPaused = false;
+        let touchStartX = 0;
+        let touchEndX = 0;
+
         const slideElement = document.getElementById('slide');
-        const interval = 45000; // 45 seconds per slide
+        const dotsContainer = document.getElementById('dots');
+        const updatedElement = document.getElementById('updated');
+        const pausedIndicator = document.getElementById('pausedIndicator');
+        const slideshow = document.getElementById('slideshow');
 
-        // Preload all images
-        images.forEach(src => {
-            const img = new Image();
-            img.src = src;
-        });
+        const INTERVAL = 45000; // 45 seconds per slide
+        const SWIPE_THRESHOLD = 50;
 
-        function showSlide() {
+        // Load images from JSON manifest
+        async function loadImages() {
+            try {
+                const response = await fetch('images.json?' + Date.now());
+                const data = await response.json();
+                images = data.images;
+                updatedElement.textContent = 'Updated: ' + formatDate(data.updated);
+
+                if (images.length > 0) {
+                    createDots();
+                    preloadImages();
+                    showSlide(0);
+                    startSlideshow();
+                }
+            } catch (error) {
+                console.error('Failed to load images:', error);
+                updatedElement.textContent = 'Error loading images';
+            }
+        }
+
+        function formatDate(dateStr) {
+            const date = new Date(dateStr + 'T00:00:00');
+            return date.toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+            });
+        }
+
+        function createDots() {
+            dotsContainer.innerHTML = '';
+            images.forEach((_, i) => {
+                const dot = document.createElement('div');
+                dot.className = 'dot' + (i === 0 ? ' active' : '');
+                dot.addEventListener('click', () => goToSlide(i));
+                dotsContainer.appendChild(dot);
+            });
+        }
+
+        function updateDots() {
+            const dots = dotsContainer.querySelectorAll('.dot');
+            dots.forEach((dot, i) => {
+                dot.classList.toggle('active', i === currentIndex);
+            });
+        }
+
+        function preloadImages() {
+            images.forEach(src => {
+                const img = new Image();
+                img.src = src;
+            });
+        }
+
+        function showSlide(index) {
+            currentIndex = index;
             slideElement.classList.remove('active');
+
             setTimeout(() => {
                 slideElement.src = images[currentIndex];
                 slideElement.classList.add('active');
-                currentIndex = (currentIndex + 1) % images.length;
-            }, 500);
+                updateDots();
+            }, 400);
         }
 
-        // Show first slide immediately
-        slideElement.src = images[0];
-        slideElement.classList.add('active');
-        currentIndex = 1;
+        function nextSlide() {
+            const nextIndex = (currentIndex + 1) % images.length;
+            showSlide(nextIndex);
+        }
 
-        // Start slideshow
-        setInterval(showSlide, interval);
+        function prevSlide() {
+            const prevIndex = (currentIndex - 1 + images.length) % images.length;
+            showSlide(prevIndex);
+        }
+
+        function goToSlide(index) {
+            if (index !== currentIndex) {
+                showSlide(index);
+                resetInterval();
+            }
+        }
+
+        function startSlideshow() {
+            if (intervalId) clearInterval(intervalId);
+            intervalId = setInterval(() => {
+                if (!isPaused) nextSlide();
+            }, INTERVAL);
+        }
+
+        function resetInterval() {
+            startSlideshow();
+        }
+
+        function togglePause() {
+            isPaused = !isPaused;
+            pausedIndicator.classList.toggle('visible', isPaused);
+            setTimeout(() => {
+                if (!isPaused) pausedIndicator.classList.remove('visible');
+            }, 1000);
+        }
+
+        // Touch/swipe handling
+        function handleTouchStart(e) {
+            touchStartX = e.changedTouches[0].screenX;
+        }
+
+        function handleTouchEnd(e) {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        }
+
+        function handleSwipe() {
+            const diff = touchStartX - touchEndX;
+            if (Math.abs(diff) > SWIPE_THRESHOLD) {
+                if (diff > 0) {
+                    nextSlide();
+                } else {
+                    prevSlide();
+                }
+                resetInterval();
+            }
+        }
+
+        // Event listeners
+        slideshow.addEventListener('touchstart', handleTouchStart, { passive: true });
+        slideshow.addEventListener('touchend', handleTouchEnd, { passive: true });
+
+        // Click/tap to advance
+        slideshow.addEventListener('click', (e) => {
+            if (e.target.classList.contains('dot')) return;
+            nextSlide();
+            resetInterval();
+        });
+
+        // Pause on hover (desktop)
+        slideshow.addEventListener('mouseenter', () => {
+            isPaused = true;
+        });
+        slideshow.addEventListener('mouseleave', () => {
+            isPaused = false;
+        });
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                nextSlide();
+                resetInterval();
+            } else if (e.key === 'ArrowLeft') {
+                prevSlide();
+                resetInterval();
+            } else if (e.key === 'p') {
+                togglePause();
+            }
+        });
+
+        // Initialize
+        loadImages();
     </script>
 </body>
 </html>
